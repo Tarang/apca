@@ -316,13 +316,14 @@ pub struct OrderReqInit {
 
 impl OrderReqInit {
   /// Create an `OrderReq` from an `OrderReqInit`.
-  pub fn init<S>(self, symbol: S, side: Side, quantity: u64) -> OrderReq
+  pub fn init<S>(self, symbol: S, side: Side, quantity: u64, notional: Option<u64>) -> OrderReq
   where
     S: Into<asset::Symbol>,
   {
     OrderReq {
       symbol: symbol.into(),
       quantity,
+      notional: notional.unwrap_or(0),
       side,
       class: self.class,
       type_: self.type_,
@@ -337,6 +338,9 @@ impl OrderReqInit {
   }
 }
 
+fn is_zero(n: &u64) -> bool {
+  return n == &0;
+}
 
 /// A POST request to be made to the /v2/orders endpoint.
 #[derive(Clone, Debug, Serialize, PartialEq)]
@@ -345,12 +349,11 @@ pub struct OrderReq {
   #[serde(rename = "symbol")]
   pub symbol: asset::Symbol,
   /// Number of shares to trade.
-  #[serde(skip_serializing_if = "is_zero")]
-  #[serde(rename = "qty", serialize_with = "u64_to_str")]
+  #[serde(rename = "qty", serialize_with = "u64_to_str", skip_serializing_if = "is_zero")]
   pub quantity: u64,
 
-  #[serde(skip_serializing_if = "is_zero")]
-  #[serde(rename = "notional", serialize_with = "u64_to_str")]
+  ///The notional amount
+  #[serde(rename = "notional", serialize_with = "u64_to_str", skip_serializing_if = "is_zero")]
   pub notional: u64,
 
   /// The side the order is on.
