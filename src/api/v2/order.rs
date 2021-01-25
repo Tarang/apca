@@ -345,8 +345,14 @@ pub struct OrderReq {
   #[serde(rename = "symbol")]
   pub symbol: asset::Symbol,
   /// Number of shares to trade.
+  #[serde(skip_serializing_if = "is_zero")]
   #[serde(rename = "qty", serialize_with = "u64_to_str")]
   pub quantity: u64,
+
+  #[serde(skip_serializing_if = "is_zero")]
+  #[serde(rename = "notional", serialize_with = "u64_to_str")]
+  pub notional: u64,
+
   /// The side the order is on.
   #[serde(rename = "side")]
   pub side: Side,
